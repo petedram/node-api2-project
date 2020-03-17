@@ -58,8 +58,6 @@ router.post('/posts/:id/comments', (req, res) => {
     }
 });
 
-
-
 //GET request to /api/posts:
 router.get('/posts', (req, res) => {
     DB.find(req.query)
@@ -76,10 +74,41 @@ router.get('/posts', (req, res) => {
 });
 
 //GET request to /api/posts/:id
-
+router.get('/:id', (req, res) => {
+    DB.findById(req.params.id)
+        .then(id => {
+            if (id) {
+                res.status(200).json(id);
+            } else {
+                res.status(404).json({ message: "The post with the specified ID does not exist." });
+            }
+        })
+        .catch(error => {
+            // log error to database
+            console.log(error);
+            res.status(500).json({
+                error: "The comments information could not be retrieved.",
+            });
+        });
+});
 
 // GET request to /api/posts/:id/comments
+router.get('/posts/:id/messages', async (req, res) => {
+    try {
+        const messages = await DB.findPostComments(req.params.id);
 
+        if (messages.length > 0) {
+            res.status(200).json(messages);
+        } else {
+            res.status(404).json({ message: "The post with the specified ID does not exist." });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: "The comments information could not be retrieved.",
+        });
+    }
+});
 
 // DELETE request to /api/posts/:id 
 router.delete('/posts/:id', (req, res) => {
@@ -102,9 +131,32 @@ router.delete('/posts/:id', (req, res) => {
 
 
 // PUT request to /api/posts/:id
-
-
-
+router.put('/posts/:id', (req, res) => {
+    const putInfo = {...req.body, post_id: req.params.id }
+    console.log('putInfo', putInfo);
+    if (putInfo.title && putInfo.contents) {
+    DB.update(req.params.id, changes)
+        .then(db => {
+            if (db) {
+                res.status(200).json(db);
+            } else {
+                res.status(404).json({ message: "The post with the specified ID does not exist." });
+            }
+        })
+        .catch(error => {
+            // log error to database
+            console.log(error);
+            res.status(500).json({
+                message: 'Error updating the hub',
+            });
+        });
+    } else {
+        console.log('object error');
+        res.status(400).json({
+            errorMessage: "Please provide title and contents for the post."
+        });
+    }
+});
 
 
 

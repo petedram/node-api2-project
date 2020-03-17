@@ -1,5 +1,7 @@
 const express = require('express');
 const dbRouter = require('./hubs/db-router.js');
+const cors = require('cors');
+
 
 //add messages-router?
 
@@ -7,6 +9,9 @@ const dbRouter = require('./hubs/db-router.js');
 const server = express();
 
 server.use(express.json());
+
+//cors middleware stretch
+server.use(cors());
 
 //any requests to this path will be passed to this router
 server.use('/api/', dbRouter); //can put in a function that is defined elsewhere.
